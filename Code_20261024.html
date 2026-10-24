@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI × Lo's Crema 咖啡匹配测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f6f0e8;
+            color: #4b3621;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #6b4423;
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8c6a4b;
+            font-size: 15px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 24px rgba(107, 68, 35, 0.12);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ece3d6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #a67c52, #6b4423);
+            transition: width 0.3s ease;
+        }
+
+        .question {
+            margin-bottom: 28px;
+        }
+
+        .q-title {
+            font-weight: 600;
+            margin-bottom: 14px;
+            font-size: 18px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            border: 1.5px solid #d9c8b8;
+            border-radius: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: #fffdfa;
+        }
+
+        .option:hover {
+            border-color: #8c6a4b;
+            background-color: #fff8f0;
+            transform: translateY(-1px);
+        }
+
+        .option.selected {
+            background-color: #6b4423;
+            color: white;
+            border-color: #6b4423;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 26px;
+            border: none;
+            border-radius: 12px;
+            background-color: #6b4423;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #523319;
+        }
+
+        button:disabled {
+            background: #b8a899;
+            cursor: not-allowed;
+        }
+
+        .start-desc {
+            background: #fff5ec;
+            border-left: 4px solid #a67c52;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        #result-type {
+            font-size: 48px;
+            font-weight: bold;
+            color: #6b4423;
+            text-align: center;
+            margin: 12px 0;
+            letter-spacing: 4px;
+        }
+
+        #coffee-name {
+            font-size: 26px;
+            text-align: center;
+            color: #8c4c28;
+            margin-bottom: 18px;
+        }
+
+        .result-desc {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff5ec;
+            border-radius: 14px;
+            line-height: 1.8;
+        }
+
+        .match-reason {
+            margin-top: 14px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid #e6d5c3;
+            border-radius: 12px;
+        }
+
+        .tip {
+            font-size: 13px;
+            color: #997c60;
+            text-align: center;
+            margin-top: 22px;
+        }
+
+        .result-page-center {
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            #result-type {
+                font-size: 40px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☕ MBTI × Lo's Crema</h1>
+            <div class="subtitle">人格咖啡匹配测试 · 发现你的专属咖啡</div>
+        </header>
+
+        <div class="card">
+            <!-- 开始页 -->
+            <div id="start-page" class="page active">
+                <div class="start-desc">
+                    欢迎来到 Lo's Crema！<br>
+                    我们准备了 10 道趣味选择题，凭第一直觉作答，完成后将根据你的 MBTI 人格，从菜单中为你匹配一款专属咖啡。
+                </div>
+                <p style="color:#8c6a4b;">测试仅作娱乐互动，结果参考 Lo's Crema 菜单饮品。</p>
+                <br>
+                <button onclick="startTest()" style="width:100%;">开始测试</button>
+            </div>
+
+            <!-- 答题页 -->
+            <div id="quiz-page" class="page">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div id="question-box"></div>
+                <div class="btn-group">
+                    <button id="prev-btn" onclick="prevQuestion()" disabled>上一题</button>
+                    <button id="next-btn" onclick="nextQuestion()">下一题</button>
+                </div>
+            </div>
+
+            <!-- 结果页 -->
+            <div id="result-page" class="page">
+                <div class="result-page-center">
+                    <p>你的 MBTI 人格是</p>
+                    <div id="result-type"></div>
+                    <p>为你匹配 Lo's Crema</p>
+                    <div id="coffee-name"></div>
+                </div>
+
+                <div class="result-desc" id="coffee-desc"></div>
+
+                <div class="match-reason">
+                    <strong>为什么适合你：</strong>
+                    <span id="match-reason-text"></span>
+                </div>
+
+                <button onclick="restartTest()" style="width:100%;margin-top:24px;">重新测试</button>
+                <div class="tip">本测试为趣味娱乐项目，非专业心理量表</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 题目配置：覆盖 E/I、S/N、T/F、J/P 四个维度
+        const questions = [
+            {
+                title: "周末有空，你更愿意？",
+                options: [
+                    { text: "约朋友出门聚会，热热闹闹", val: "E" },
+                    { text: "自己安静独处，看书追剧", val: "I" }
+                ]
+            },
+            {
+                title: "接收信息时，你更关注？",
+                options: [
+                    { text: "真实细节、实际体验", val: "S" },
+                    { text: "可能性、灵感和联想", val: "N" }
+                ]
+            },
+            {
+                title: "做决定时，你更依靠？",
+                options: [
+                    { text: "逻辑、公平和利弊分析", val: "T" },
+                    { text: "感受、人情与和谐氛围", val: "F" }
+                ]
+            },
+            {
+                title: "面对计划，你习惯？",
+                options: [
+                    { text: "提前安排好，按计划走", val: "J" },
+                    { text: "随性灵活，走一步看一步", val: "P" }
+                ]
+            },
+            {
+                title: "累了的时候，你恢复能量的方式是？",
+                options: [
+                    { text: "找人聊天、出去热闹一下", val: "E" },
+                    { text: "一个人待着，远离人群", val: "I" }
+                ]
+            },
+            {
+                title: "别人描述一件事，你更容易记住？",
+                options: [
+                    { text: "具体事实、数据细节", val: "S" },
+                    { text: "背后含义、脑洞想法", val: "N" }
+                ]
+            },
+            {
+                title: "和朋友意见不同时，你更在意？",
+                options: [
+                    { text: "道理对错、客观事实", val: "T" },
+                    { text: "对方情绪、不要伤害感情", val: "F" }
+                ]
+            },
+            {
+                title: "假期出行，你更喜欢？",
+                options: [
+                    { text: "做好攻略，行程清晰", val: "J" },
+                    { text: "随便逛逛，随缘探索", val: "P" }
+                ]
+            },
+            {
+                title: "你更喜欢哪类话题？",
+                options: [
+                    { text: "现实生活、实用干货", val: "S" },
+                    { text: "脑洞幻想、未来想法", val: "N" }
+                ]
+            },
+            {
+                title: "任务截止前，你一般？",
+                options: [
+                    { text: "尽早做完，心里踏实", val: "J" },
+                    { text: "临近截止才爆发动力", val: "P" }
+                ]
+            }
+        ];
+
+        // 完整咖啡匹配库：基于 Lo's Crema 菜单
+        const coffeeMap = {
+            "INTJ": {
+                name: "馥芮白 Flat White",
+                desc: "内敛理性的建筑师，适合干净凝练的馥芮白。浓缩风味清晰，奶香柔和不喧宾夺主，层次克制而稳定，像你习惯深度思考的大脑。",
+                reason: "低冗余、高聚焦、风味干净，适合喜欢清晰逻辑与独立空间的你。"
+            },
+            "INTP": {
+                name: "拿铁 Latte",
+                desc: "好奇开放的逻辑学家，适合均衡温和的拿铁。咖啡与牛奶融合自然，简单却有很多探索空间，像你总能从日常里发现新问题。",
+                reason: "经典但不单调，包容度高，适合喜欢分析、联想和保持开放的你。"
+            },
+            "ENTJ": {
+                name: "卡布奇诺 Cappuccino",
+                desc: "果断利落的指挥官，适合层次鲜明的卡布奇诺。浓缩、奶泡与牛奶结构清楚，入口有力量感，像你目标明确的行事风格。",
+                reason: "结构清晰、仪式感强、不拖泥带水，适合高效直接的你。"
+            },
+            "ENTP": {
+                name: "生椰拿铁 Coconut Latte",
+                desc: "脑洞活跃的辩论家，适合清爽有记忆点的生椰拿铁。椰香与咖啡碰撞出新鲜感，不拘泥传统，像你总喜欢提出新角度。",
+                reason: "组合新奇、风味鲜明，适合爱讨论、爱创新、爱打破常规的你。"
+            },
+            "INFJ": {
+                name: "燕麦拿铁 Oat Latte",
+                desc: "温柔深邃的提倡者，适合温润柔和的燕麦拿铁。谷物香气细腻，口感不张扬，像你习惯默默理解他人、给予支持。",
+                reason: "温暖、包容、低调有质感，适合细腻敏感又善于洞察的你。"
+            },
+            "INFP": {
+                name: "抹茶拿铁 Mocha Tea Latte",
+                desc: "浪漫敏感的调停者，适合清新雅致的抹茶拿铁。茶香与奶香柔和交织，带一点文艺气质，像你内心丰富的小世界。",
+                reason: "温柔、有氛围、不商业化，适合喜欢诗意、安静与自我表达的你。"
+            },
+            "ENFJ": {
+                name: "香草拿铁 Vanilla Latte",
+                desc: "热情亲和的主人公，适合香甜柔和的香草拿铁。香草香气温暖友好，容易被大家接受，像你总能照顾到周围人的感受。",
+                reason: "友好、治愈、有亲和力，适合擅长连接他人的你。"
+            },
+            "ENFP": {
+                name: "摩卡 Mocha",
+                desc: "热烈快乐的竞选者，适合香甜丰富的摩卡。巧克力、牛奶与咖啡融合出高幸福感，像你总能把日常变得有趣。",
+                reason: "活泼、丰富、情绪价值高，适合喜欢惊喜和热闹的你。"
+            },
+            "ISTJ": {
+                name: "焦糖玛奇朵 Caramel Macchiato",
+                desc: "踏实严谨的检查员，适合层次清楚的焦糖玛奇朵。焦糖、奶与浓缩顺序分明，经典稳定，像你做事靠谱、重视规则。",
+                reason: "流程清楚、口味经典、结果稳定，适合严谨守序的你。"
+            },
+            "ISFJ": {
+                name: "燕麦焦糖玛奇朵 Oat Caramel Macchiato",
+                desc: "贴心细致的守卫者，适合更温润的燕麦焦糖玛奇朵。燕麦柔和，焦糖香甜不腻，像你默默照顾别人时的温暖方式。",
+                reason: "比经典款更温和，照顾感更强，适合细心体贴的你。"
+            },
+            "ESTJ": {
+                name: "拿铁 Latte",
+                desc: "务实条理的管理者，适合简单可靠的拿铁。搭配均衡，选择成本低，冰热皆宜，像你喜欢高效、清楚、好执行的方案。",
+                reason: "稳定、百搭、不花哨，适合重视效率和结果的你。"
+            },
+            "ESFJ": {
+                name: "生椰热可可 Hot Cocoa with Coconut",
+                desc: "热情爱分享的东道主，适合香甜温暖的生椰热可可。可可浓郁，椰香温暖，很适合和朋友一起分享这份热乎感。",
+                reason: "温暖、香甜、有社交氛围，适合喜欢照顾大家情绪的你。"
+            },
+            "ISTP": {
+                name: "卡布奇诺 Cappuccino",
+                desc: "灵活务实的鉴赏家，适合简单但讲究细节的卡布奇诺。奶泡质地、咖啡比例和温度都很重要，像你擅长在操作中找到乐趣。",
+                reason: "简单直接但细节丰富，适合喜欢体验、观察和动手的你。"
+            },
+            "ISFP": {
+                name: "香草拿铁 Vanilla Latte",
+                desc: "安静有审美的艺术家，适合柔和细腻的香草拿铁。香气不浓烈，口感顺滑，像你偏好用温和方式表达自己。",
+                reason: "低调、治愈、有细腻质感，适合偏爱舒适感和审美氛围的你。"
+            },
+            "ESTP": {
+                name: "焦糖玛奇朵 Caramel Macchiato",
+                desc: "活力外向的挑战者，适合甜感鲜明的焦糖玛奇朵。焦糖香气直接，入口有记忆点，像你喜欢快速进入状态、享受当下。",
+                reason: "风味鲜明、上手快、有满足感，适合爱行动、爱体验的你。"
+            },
+            "ESFP": {
+                name: "摩卡 Mocha",
+                desc: "乐观活泼的表演者，适合香甜快乐的摩卡。巧克力与咖啡带来轻松愉悦感，像你总能把气氛带动起来。",
+                reason: "愉悦感强、口味讨喜、适合分享，适合喜欢热闹和当下体验的你。"
+            }
+        };
+
+        let currentQ = 0;
+        let answers = [];
+        let E = 0, I = 0, S = 0, N = 0, T = 0, F = 0, J = 0, P = 0;
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startTest() {
+            currentQ = 0;
+            answers = Array(questions.length).fill(null);
+            E = I = S = N = T = F = J = P = 0;
+            renderQuestion();
+            showPage('quiz-page');
+        }
+
+        function updateProgress() {
+            const percent = ((currentQ + 1) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = percent + '%';
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQ];
+            updateProgress();
+
+            let html = `<div class="question"><div class="q-title">第 ${currentQ + 1} 题 / 共 ${questions.length} 题<br>${q.title}</div><div class="options">`;
+
+            q.options.forEach((opt, idx) => {
+                let cls = answers[currentQ] === idx ? 'option selected' : 'option';
+                html += `<div class="${cls}" onclick="selectAns(${idx})">${opt.text}</div>`;
+            });
+
+            html += `</div></div>`;
+            document.getElementById('question-box').innerHTML = html;
+            document.getElementById('prev-btn').disabled = currentQ === 0;
+        }
+
+        function selectAns(idx) {
+            answers[currentQ] = idx;
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            if (answers[currentQ] === null) {
+                alert("请先选择一个答案！");
+                return;
+            }
+
+            if (currentQ < questions.length - 1) {
+                currentQ++;
+                renderQuestion();
+            } else {
+                calcResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQ > 0) {
+                currentQ--;
+                renderQuestion();
+            }
+        }
+
+        function calcResult() {
+            E = I = S = N = T = F = J = P = 0;
+
+            answers.forEach((aidx, qidx) => {
+                const val = questions[qidx].options[aidx].val;
+                if (val === "E") E++;
+                if (val === "I") I++;
+                if (val === "S") S++;
+                if (val === "N") N++;
+                if (val === "T") T++;
+                if (val === "F") F++;
+                if (val === "J") J++;
+                if (val === "P") P++;
+            });
+
+            let mbti = "";
+            mbti += E >= I ? "E" : "I";
+            mbti += S >= N ? "S" : "N";
+            mbti += T >= F ? "T" : "F";
+            mbti += J >= P ? "J" : "P";
+
+            const res = coffeeMap[mbti];
+            document.getElementById('result-type').innerText = mbti;
+            document.getElementById('coffee-name').innerText = "☕ " + res.name;
+            document.getElementById('coffee-desc').innerText = res.desc;
+            document.getElementById('match-reason-text').innerText = res.reason;
+
+            showPage('result-page');
+        }
+
+        function restartTest() {
+            showPage('start-page');
+        }
+    </script>
+</body>
+</html>
